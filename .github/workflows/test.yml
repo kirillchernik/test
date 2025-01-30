@@ -29,7 +29,7 @@ jobs:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
     # Once dev is live -- remove the `if` condition below.
-    if: ${{ var.CAN_DEPLOY }}
+    if: ${{ vars.CAN_DEPLOY }}
     steps:
       - name: Test variables
         id: test
