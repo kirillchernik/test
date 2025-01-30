@@ -19,7 +19,7 @@ jobs:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     steps:
       - name: Test variables
-        if:  ${{ github.event_name != 'push' || inputs.environment != 'development' }}
+        if:  ${{ github.event_name == 'workflow_dispatch' && inputs.environment != 'development' }}
         run: |
           echo "VARIABLE IS ${{vars.VARIABLE}}"
           echo "ENV is ${{inputs.environment}}"
@@ -35,6 +35,6 @@ jobs:
             echo "SECRET2 is not set"
           fi
       - name: Test variables for development
-        if:  ${{ github.event_name == 'push' || inputs.environment == 'development' }}
+        if:  ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.environment == 'development' }}
         run: echo "JUST DEV. TODO"
 
