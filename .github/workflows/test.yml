@@ -48,4 +48,4 @@ jobs:
         run: |
           EXISTING_TAGS=$(git tag -l "*${GITHUB_SHA:0:7}*")
           NEW_TAG="${CURRENT_ENVIRONMENT}-${GITHUB_SHA:0:7}"
-          echo "EXISTING_TAGS: ${{EXISTING_TAGS}} and NEW_TAG: ${{NEW_TAG}}"
+          echo "EXISTING_TAGS: $EXISTING_TAGS and NEW_TAG: $NEW_TAG"
