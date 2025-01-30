@@ -7,13 +7,16 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy to"
+        description: "Environment to test"
         type: environment
         required: true
 
 jobs:
   one:
+    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     steps:
       - name: Dump GitHub context
         env:
