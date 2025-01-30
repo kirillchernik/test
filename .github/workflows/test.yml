@@ -22,10 +22,10 @@ env:
 
 jobs:
   variables:
-    name: Test ${{ CURRENT_ENVIRONMENT }}
+    name: Test ${{ env.CURRENT_ENVIRONMENT }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ CURRENT_ENVIRONMENT }}
+      name: ${{ env.CURRENT_ENVIRONMENT }}
     steps:
       # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
       # Once dev is live -- remove the `if` conditions below.
