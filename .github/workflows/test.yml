@@ -12,42 +12,22 @@ on:
         required: true
 
 jobs:
-  one:
+  variables:
     name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-
-      - name: Show default environment variables
+      - name: Test variables
         run: |
-          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
-          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
-          echo "The run id is: $GITHUB_RUN_ID"
-          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
-          echo "GitHub SHA: $GITHUB_SHA"
-          echo "VARIABLE IS ${{env.VARIABLE}}"
+          echo "VARIABLE IS ${{var.VARIABLE}}"
+          if [ -n "${{secrets.SECRET}}" ]; then
+            echo "SECRET EXISTS"
+          else
+            echo "SECRET is not set"
+          fi
+          if [ -n "${{secrets.SECRET2}}" ]; then
+            echo "SECRET2 EXISTS"
+          else
+            echo "SECRET2 is not set"
+          fi
