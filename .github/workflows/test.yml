@@ -23,7 +23,7 @@ env:
 jobs:
   deploy:
     # github currently does not support usage of env variables on a job level definitions
-    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+    name: Test ${{ github.event_name }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
