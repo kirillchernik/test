@@ -23,7 +23,7 @@ env:
 jobs:
   deploy:
     # github currently does not support usage of env variables on a job level definitions
-    name: Test ${{ inputs.environment }}
+    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
@@ -40,6 +40,10 @@ jobs:
           else
             echo "VARIABLE IS ${{vars.VARIABLE}}"
           fi
+        continue-on-error: false
+      - name: Test variables 2
+        id: test
+        run: echo "VARIABLE IS ${{vars.VARIABLE}}"
         continue-on-error: false
 
   tag-commit:
