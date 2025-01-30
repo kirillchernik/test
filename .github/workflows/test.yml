@@ -14,34 +14,36 @@ on:
         type: environment
         required: true
 
+env:
+  # If the environment input was not provided (i.e if the commit was pushed to main),
+  # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
+  # and use an input environment for manually triggered jobs
+  CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
 
 jobs:
-  variables:
-    env:
-      # If the environment input was not provided (i.e if the commit was pushed to main),
-      # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
-      # and use an input environment for manually triggered jobs
-      CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
-
-    # github currently does not support usage of env variables in job definitions
+  deploy:
+    # github currently does not support usage of env variables on a job level definitions
     name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+    # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
+    # Once dev is live -- remove the `if` condition below.
+    # SHOULD THIS BE A VARIABLE ON ENV LEVEL (var.can_deploy)?
+    if: ${{ github.event_name != 'push' && inputs.environment != 'development'}}
     steps:
-      # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
-      # Once dev is live -- remove the `if` conditions below.
       - name: Test variables
         id: test
-        if:  ${{ env.CURRENT_ENVIRONMENT != 'development' }}
         run: echo "VARIABLE IS ${{vars.VARIABLE}}"
         continue-on-error: false
-      - name: Test variables for development
-        if: ${{ env.CURRENT_ENVIRONMENT == 'development' }}
-        run: echo "JUST DEV. TODO"
+
+  tag-commit:
+    name: Tag Commit
+    runs-on: ubuntu-latest
+    # Only run this step if the deployment succeeded.
+    needs:
+      - deploy
+    steps:
       - name: Tag Deployment
-        # Only run this step if the deployment succeeded.
-        needs: [test]
         # if: test.result
         run: echo "RESULT IS ${{steps.test.result}}"
-
