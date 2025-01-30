@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Test variables
         run: |
-          echo "VARIABLE IS ${{var.VARIABLE}}"
+          echo "VARIABLE IS ${{vars.VARIABLE}}"
           if [ -n "${{secrets.SECRET}}" ]; then
             echo "SECRET EXISTS"
           else
