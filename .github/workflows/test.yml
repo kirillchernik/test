@@ -1,40 +1,38 @@
 
 name: "Test"
 on:
+  # This will trigger deployment to `development` on each push to main
+  # `development` is set as a default environment below
   push:
     branches:
       - main
+  # However, deployemnt to other environments (or re-running job for `development`) should be done manually
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to test"
+        description: "Environment to deploy to"
         type: environment
         required: true
+
+env:
+  # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
+  # Once dev is live -- remove this and `if` conditions below.
+  IS_DEV: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.environment == 'development' }}
 
 jobs:
   variables:
     name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     runs-on: ubuntu-latest
     environment:
+      # If the environment input was not provided (i.e if the commit was pushed to main),
+      # default to `development`. Effectively, it will run deploy for `development` on each push to main,
+      # and use an input environment for manually triggered jobs
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     steps:
       - name: Test variables
-        if:  ${{ github.event_name == 'workflow_dispatch' && inputs.environment != 'development' }}
-        run: |
-          echo "VARIABLE IS ${{vars.VARIABLE}}"
-          echo "ENV is ${{inputs.environment}}"
-          echo "EVENT NAME IS ${{github.event_name}}"
-          if [ -n "${{secrets.SECRET}}" ]; then
-            echo "SECRET EXISTS"
-          else
-            echo "SECRET is not set"
-          fi
-          if [ -n "${{secrets.SECRET2}}" ]; then
-            echo "SECRET2 EXISTS"
-          else
-            echo "SECRET2 is not set"
-          fi
+        if:  ${{ env.IS_DEV == 'false' }}
+        run: echo "VARIABLE IS ${{vars.VARIABLE}}"
       - name: Test variables for development
-        if:  ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.environment == 'development' }}
+        if: ${{ IS_DEV == 'true' }}
         run: echo "JUST DEV. TODO"
 
