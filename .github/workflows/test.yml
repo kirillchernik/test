@@ -30,12 +30,11 @@ jobs:
     # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
     # Once dev is live -- remove the `if` condition below.
     # SHOULD THIS BE A VARIABLE ON ENV LEVEL (var.can_deploy)?
-    # if: ${{ github.event_name != 'push' && inputs.environment != 'development'}}
+    if: ${{ github.event_name != 'push' && inputs.environment != 'development'}}
     steps:
       - name: Test variables
         id: test
-        # run: echo "VARIABLE IS ${{vars.VARIABLE}}"
-        run: exit 1
+        run: echo "VARIABLE IS ${{vars.VARIABLE}}"
         continue-on-error: false
 
   tag-commit:
