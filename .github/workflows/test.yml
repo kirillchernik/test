@@ -14,14 +14,14 @@ on:
         type: environment
         required: true
 
-env:
-  # If the environment input was not provided (i.e if the commit was pushed to main),
-  # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
-  # and use an input environment for manually triggered jobs
-  CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
 
 jobs:
   variables:
+    env:
+      # If the environment input was not provided (i.e if the commit was pushed to main),
+      # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
+      # and use an input environment for manually triggered jobs
+      CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     name: Test ${{ env.CURRENT_ENVIRONMENT }}
     runs-on: ubuntu-latest
     environment:
