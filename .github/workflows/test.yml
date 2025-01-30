@@ -22,10 +22,12 @@ jobs:
       # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
       # and use an input environment for manually triggered jobs
       CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
-    name: Test ${{ env.CURRENT_ENVIRONMENT }}
+
+    # github currently does not support usage of env variables in job definitions
+    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ env.CURRENT_ENVIRONMENT }}
+      name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     steps:
       # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
       # Once dev is live -- remove the `if` conditions below.
@@ -33,6 +35,7 @@ jobs:
         id: test
         if:  ${{ env.CURRENT_ENVIRONMENT != 'development' }}
         run: echo "VARIABLE IS ${{vars.VARIABLE}}"
+        continue-on-error: false
       - name: Test variables for development
         if: ${{ env.CURRENT_ENVIRONMENT == 'development' }}
         run: echo "JUST DEV. TODO"
@@ -40,5 +43,5 @@ jobs:
         # Only run this step if the deployment succeeded.
         needs: [test]
         # if: test.result
-        run: echo "RESULT IS ${{test.result}}"
+        run: echo "RESULT IS ${{steps.test.result}}"
 
