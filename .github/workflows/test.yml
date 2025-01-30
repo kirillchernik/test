@@ -23,17 +23,23 @@ env:
 jobs:
   deploy:
     # github currently does not support usage of env variables on a job level definitions
-    name: ${{ format('Test {0}', github.event_name == 'push' && 'development' || inputs.environment) }}
+    name: Test ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
     # Once dev is live -- remove the `if` condition below.
-    # if: ${{ vars.CAN_DEPLOY }}
+    # SHOULD THIS BE A VARIABLE ON ENV LEVEL (var.can_deploy)?
+    # if: ${{ github.event_name != 'push' && inputs.environment != 'development'}}
     steps:
       - name: Test variables
         id: test
-        run: echo "VARIABLE IS ${{vars.VARIABLE}}"
+        run: |
+          if [[ ${{env.CURRENT_ENVIRONMENT}} == 'development' ]]; then
+            exit 1
+          else
+            echo "VARIABLE IS ${{vars.VARIABLE}}"
+          fi
         continue-on-error: false
 
   tag-commit:
