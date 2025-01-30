@@ -15,24 +15,30 @@ on:
         required: true
 
 env:
-  # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
-  # Once dev is live -- remove this and `if` conditions below.
-  IS_DEV: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' && inputs.environment == 'development' }}
+  # If the environment input was not provided (i.e if the commit was pushed to main),
+  # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
+  # and use an input environment for manually triggered jobs
+  CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
 
 jobs:
   variables:
-    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+    name: Test ${{ CURRENT_ENVIRONMENT }}
     runs-on: ubuntu-latest
     environment:
-      # If the environment input was not provided (i.e if the commit was pushed to main),
-      # default to `development`. Effectively, it will run deploy for `development` on each push to main,
-      # and use an input environment for manually triggered jobs
-      name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+      name: ${{ CURRENT_ENVIRONMENT }}
     steps:
+      # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
+      # Once dev is live -- remove the `if` conditions below.
       - name: Test variables
-        if:  ${{ env.IS_DEV == 'false' }}
+        id: test
+        if:  ${{ env.CURRENT_ENVIRONMENT != 'development' }}
         run: echo "VARIABLE IS ${{vars.VARIABLE}}"
       - name: Test variables for development
-        if: ${{ env.IS_DEV == 'true' }}
+        if: ${{ env.CURRENT_ENVIRONMENT == 'development' }}
         run: echo "JUST DEV. TODO"
+      - name: Tag Deployment
+        # Only run this step if the deployment succeeded.
+        needs: [test]
+        # if: test.result
+        run: echo "RESULT IS ${{test.result}}"
 
