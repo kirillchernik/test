@@ -19,6 +19,7 @@ jobs:
       name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
     steps:
       - name: Test variables
+        if:  ${{ github.event_name != 'push' || inputs.environment != 'development' }}
         run: |
           echo "VARIABLE IS ${{vars.VARIABLE}}"
           if [ -n "${{secrets.SECRET}}" ]; then
@@ -31,3 +32,7 @@ jobs:
           else
             echo "SECRET2 is not set"
           fi
+      - name: Test variables for development
+        if:  ${{ github.event_name == 'push' || inputs.environment == 'development' }}
+        run: echo "JUST DEV. TODO"
+
