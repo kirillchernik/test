@@ -33,6 +33,6 @@ jobs:
         if:  ${{ env.IS_DEV == 'false' }}
         run: echo "VARIABLE IS ${{vars.VARIABLE}}"
       - name: Test variables for development
-        if: ${{ IS_DEV == 'true' }}
+        if: ${{ env.IS_DEV == 'true' }}
         run: echo "JUST DEV. TODO"
 
