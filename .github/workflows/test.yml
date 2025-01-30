@@ -36,7 +36,8 @@ jobs:
         id: test
         run: |
           if [[ ${{env.CURRENT_ENVIRONMENT}} == 'development' ]]; then
-            exit 1
+            # exit 1
+            gh run cancel ${{ github.run_id }}
           else
             echo "VARIABLE IS ${{vars.VARIABLE}}"
           fi
