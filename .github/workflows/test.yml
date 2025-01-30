@@ -22,6 +22,8 @@ jobs:
         if:  ${{ github.event_name != 'push' || inputs.environment != 'development' }}
         run: |
           echo "VARIABLE IS ${{vars.VARIABLE}}"
+          echo "ENV is ${{inputs.environment}}"
+          echo "EVENT NAME IS ${{github.event_name}}"
           if [ -n "${{secrets.SECRET}}" ]; then
             echo "SECRET EXISTS"
           else
