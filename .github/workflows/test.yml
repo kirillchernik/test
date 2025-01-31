@@ -74,9 +74,9 @@ jobs:
 
               if [[ "$TAG" =~ $CURRENT_ENV ]]; then
                 NEW_ENVS=()
-                for ENV in "${ENVS[@]}"; do
-                  if [ "$ENV" != "$CURRENT_ENV" ]; then
-                    NEW_ENVS+=("$ENV")
+                for E in "${ENVS[@]}"; do
+                  if [ "$E" != "$CURRENT_ENV" ]; then
+                    NEW_ENVS+=("$E")
                   fi
                 done
 
@@ -96,7 +96,7 @@ jobs:
 
           if [ -z "$CURRENT_TAG" ]; then
             NEW_TAG="$CURRENT_ENVIRONMENT"
-          elif [[ ! $CURRENT_TAG =~ $CURRENT_ENVIRONMENT ]]; then
+          elif [[ ! "$CURRENT_TAG" =~ $CURRENT_ENVIRONMENT ]]; then
               git tag -d "$CURRENT_TAG"
               git push --delete origin "$CURRENT_TAG" || true
               NEW_TAG="${CURRENT_TAG}-${CURRENT_ENVIRONMENT}"
