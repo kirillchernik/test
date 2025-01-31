@@ -37,10 +37,8 @@ jobs:
         continue-on-error: false
 
   tag-commit:
-    # permissions:
-    #   id-token: write
-    #   contents: read
-    #   repository-projects: write
+    permissions:
+      contents: write
     name: Tag Commit
     runs-on: ubuntu-latest
     # Only run this step if the deployment succeeded.
@@ -51,6 +49,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
       - name: Tag Deployment
         shell: bash
         run: |
