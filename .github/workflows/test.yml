@@ -37,10 +37,10 @@ jobs:
         continue-on-error: false
 
   tag-commit:
-    permissions:
-      id-token: write
-      contents: read
-      repository-projects: write
+    # permissions:
+    #   id-token: write
+    #   contents: read
+    #   repository-projects: write
     name: Tag Commit
     runs-on: ubuntu-latest
     # Only run this step if the deployment succeeded.
@@ -52,11 +52,22 @@ jobs:
         with:
           fetch-depth: 0
       - name: Tag Deployment
-        # if: test.result
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          EXISTING_TAGS=$(git tag -l "*${GITHUB_SHA:0:7}*")
-          NEW_TAG="${CURRENT_ENVIRONMENT}-${GITHUB_SHA:0:7}"
+          EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)$")
+
+          if [ ! - z "$EXISTING_TAGS" ]; then
+            LATEST_TAG=$(echo "$EXISTING_TAGS" | tail -n 1)
+            if [[ !$ENVS =~ $CURRENT_ENVIRONMENT ]]; then
+              git tag -d "$LATEST_TAG"
+              git push --delete origin "$LATEST_TAG"
+              NEW_TAG="${LATEST_TAG},${CURRENT_ENVIRONMENT}"
+            else
+              exit 0
+            fi
+          else
+            NEW_TAG="${CURRENT_ENVIRONMENT}"
+          fi
 
           echo "EXISTING_TAGS: $EXISTING_TAGS and NEW_TAG: $NEW_TAG"
