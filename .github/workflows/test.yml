@@ -14,11 +14,11 @@ on:
         type: environment
         required: true
 
-env:
-  # If the environment input was not provided (i.e if the commit was pushed to main),
-  # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
-  # and use an input environment for manually triggered jobs
-  CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+# env:
+#   # If the environment input was not provided (i.e if the commit was pushed to main),
+#   # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
+#   # and use an input environment for manually triggered jobs
+#   CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
 
 jobs:
   deploy:
@@ -53,31 +53,57 @@ jobs:
       - name: Tag Deployment
         shell: bash
         run: |
+          set -x
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          set -x
 
+          CURRENT_COMMIT=$(git rev-parse HEAD)
           CURRENT_ENVIRONMENT="${{ github.event_name == 'push' && 'development' || inputs.environment }}"
 
-          EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)$" || true)
+          get_tagged_commit() {
+            local tag=$1
+            git rev-parse $tag^{commit} 2>/dev/null || echo ""
+          }
 
-          echo "EXISTING_TAGS: $EXISTING_TAGS"
+          EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)(,.*)?$" || true)
 
-          if [ -z "$EXISTING_TAGS" ]; then
-            NEW_TAG="$CURRENT_ENVIRONMENT"
-          else
-            LATEST_TAG=$(echo "$EXISTING_TAGS" | tail -n 1 || echo "")
-            if [ -z "$LATEST_TAG" ]; then
-              NEW_TAG="$CURRENT_ENVIRONMENT"
-            elif [[ ! $LATEST_TAG =~ $CURRENT_ENVIRONMENT ]]; then
-              git tag -d "$LATEST_TAG"
-              git push --delete origin "$LATEST_TAG"
-              NEW_TAG="${LATEST_TAG},${CURRENT_ENVIRONMENT}"
-            else
-              exit 0
+          for TAG in $EXISTING_TAGS; do
+            TAGGED_COMMIT=$(get_tagged_commit $TAG)
+            if [ ! -z "$TAGGED_COMMIT" ]; then
+              IFS=',' read -ra ENVS <<< "$TAG"
+
+              if [[ "$TAG" =~ $CURRENT_ENV ]]; then
+                NEW_ENVS=()
+                for ENV in "${ENVS[@]}"; do
+                  if [ "$ENV" != "$CURRENT_ENV" ]; then
+                    NEW_ENVS+=("$ENV")
+                  fi
+                done
+
+                git tag -d "$TAG"
+                git push --delete origin "$TAG" || true
+
+                if [ ${#NEW_ENVS[@]} -gt 0 ]; then
+                  NEW_TAG=$(IFS=,; echo "${NEW_ENVS[*]}")
+                  git tag "$NEW_TAG" $TAGGED_COMMIT
+                  git push origin "$NEW_TAG"
+                fi
+              fi
             fi
+          done
+
+          CURRENT_TAG=$(git tag -l --points-at $CURRENT_COMMIT | grep -E "^(development|staging|qa|production)(,.*)?$" || echo "")
+
+          if [ -z "$CURRENT_TAG" ]; then
+            NEW_TAG="$CURRENT_ENVIRONMENT"
+          elif [[ ! $CURRENT_TAG =~ $CURRENT_ENVIRONMENT ]]; then
+              git tag -d "$CURRENT_TAG"
+              git push --delete origin "$CURRENT_TAG" || true
+              NEW_TAG="${CURRENT_TAG},${CURRENT_ENVIRONMENT}"
+          else
+            exit 0
           fi
 
           echo "NEW TAG: $NEW_TAG"
-          git tag "$NEW_TAG"
+          git tag "$NEW_TAG" $CURRENT_COMMIT
           git push origin "$NEW_TAG"
