@@ -96,12 +96,14 @@ jobs:
 
           if [ -z "$CURRENT_TAG" ]; then
             NEW_TAG="$CURRENT_ENVIRONMENT"
-          elif [[ ! "$CURRENT_TAG" =~ $CURRENT_ENVIRONMENT ]]; then
+          else
+            if [[ ! "$CURRENT_TAG" =~ $CURRENT_ENVIRONMENT ]]; then
               git tag -d "$CURRENT_TAG"
               git push --delete origin "$CURRENT_TAG" || true
               NEW_TAG="${CURRENT_TAG}-${CURRENT_ENVIRONMENT}"
-          else
-            exit 0
+            else
+              exit 0
+            fi
           fi
 
           echo "NEW TAG: $NEW_TAG"
