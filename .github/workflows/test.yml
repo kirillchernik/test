@@ -37,15 +37,26 @@ jobs:
         continue-on-error: false
 
   tag-commit:
+    permissions:
+      id-token: write
+      contents: read
+      repository-projects: write
     name: Tag Commit
     runs-on: ubuntu-latest
     # Only run this step if the deployment succeeded.
     needs:
       - deploy
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Tag Deployment
         # if: test.result
         run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
           EXISTING_TAGS=$(git tag -l "*${GITHUB_SHA:0:7}*")
           NEW_TAG="${CURRENT_ENVIRONMENT}-${GITHUB_SHA:0:7}"
+
           echo "EXISTING_TAGS: $EXISTING_TAGS and NEW_TAG: $NEW_TAG"
