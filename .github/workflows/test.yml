@@ -58,7 +58,7 @@ jobs:
           git config --local user.name "GitHub Actions"
           set -x
 
-          CURRENT_ENVIRONMENT = "${{ github.event_name == 'push' && 'development' || inputs.environment }}"
+          CURRENT_ENVIRONMENT="${{ github.event_name == 'push' && 'development' || inputs.environment }}"
 
           EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)$" || true)
           echo "EXISTING_TAGS: $EXISTING_TAGS"
