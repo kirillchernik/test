@@ -65,12 +65,12 @@ jobs:
             git rev-parse $tag^{commit} 2>/dev/null || echo ""
           }
 
-          EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)(,.*)?$" || true)
+          EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)(-.*)?$" || true)
 
           for TAG in $EXISTING_TAGS; do
             TAGGED_COMMIT=$(get_tagged_commit $TAG)
             if [ ! -z "$TAGGED_COMMIT" ]; then
-              IFS=',' read -ra ENVS <<< "$TAG"
+              IFS='-' read -ra ENVS <<< "$TAG"
 
               if [[ "$TAG" =~ $CURRENT_ENV ]]; then
                 NEW_ENVS=()
@@ -84,7 +84,7 @@ jobs:
                 git push --delete origin "$TAG" || true
 
                 if [ ${#NEW_ENVS[@]} -gt 0 ]; then
-                  NEW_TAG=$(IFS=,; echo "${NEW_ENVS[*]}")
+                  NEW_TAG=$(IFS='-'; echo "${NEW_ENVS[*]}")
                   git tag "$NEW_TAG" $TAGGED_COMMIT
                   git push origin "$NEW_TAG"
                 fi
@@ -92,14 +92,14 @@ jobs:
             fi
           done
 
-          CURRENT_TAG=$(git tag -l --points-at $CURRENT_COMMIT | grep -E "^(development|staging|qa|production)(,.*)?$" || echo "")
+          CURRENT_TAG=$(git tag -l --points-at $CURRENT_COMMIT | grep -E "^(development|staging|qa|production)(-.*)?$" || echo "")
 
           if [ -z "$CURRENT_TAG" ]; then
             NEW_TAG="$CURRENT_ENVIRONMENT"
           elif [[ ! $CURRENT_TAG =~ $CURRENT_ENVIRONMENT ]]; then
               git tag -d "$CURRENT_TAG"
               git push --delete origin "$CURRENT_TAG" || true
-              NEW_TAG="${CURRENT_TAG},${CURRENT_ENVIRONMENT}"
+              NEW_TAG="${CURRENT_TAG}-${CURRENT_ENVIRONMENT}"
           else
             exit 0
           fi
