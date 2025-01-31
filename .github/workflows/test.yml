@@ -63,7 +63,7 @@ jobs:
           EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)$" || true)
           echo "EXISTING_TAGS: $EXISTING_TAGS"
 
-          if [ - z "$EXISTING_TAGS" ]; then
+          if [ -z "$EXISTING_TAGS" ]; then
             NEW_TAG="$CURRENT_ENVIRONMENT"
           else
             LATEST_TAG=$(echo "$EXISTING_TAGS" | tail -n 1 || echo "")
@@ -79,3 +79,5 @@ jobs:
           fi
 
           echo "NEW TAG: $NEW_TAG"
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
