@@ -60,6 +60,7 @@ jobs:
           CURRENT_ENVIRONMENT="${{ github.event_name == 'push' && 'development' || inputs.environment }}"
 
           EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)$" || true)
+
           echo "EXISTING_TAGS: $EXISTING_TAGS"
 
           if [ -z "$EXISTING_TAGS" ]; then
