@@ -60,52 +60,59 @@ jobs:
           CURRENT_COMMIT=$(git rev-parse HEAD)
           CURRENT_ENVIRONMENT="${{ github.event_name == 'push' && 'development' || inputs.environment }}"
 
-          get_tagged_commit() {
-            local tag=$1
-            git rev-parse $tag^{commit} 2>/dev/null || echo ""
+          get_latest_tagged_commit() {
+            local pattern=$1
+
+            git for-each-ref --sort=-creatordate --format '(%objectname)' "refs/tags/$pattern" | head -n 1
           }
 
-          EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)(-.*)?$" || true)
-          echo "EXISTING_TAGS: $EXISTING_TAGS"
+          get_commit_tags() {
+            local commit=$1
 
-          for TAG in $EXISTING_TAGS; do
-            TAGGED_COMMIT=$(get_tagged_commit $TAG)
+            git tag -l --points-at $commit
+          }
 
-            if [ ! -z "$TAGGED_COMMIT" ]; then
-              IFS='-' read -ra ENVS <<< "$TAG"
+          LATEST_ENV_COMMIT=""
 
-              if [[ "$TAG" =~ $CURRENT_ENV ]]; then
-                NEW_ENVS=()
-                for E in "${ENVS[@]}"; do
-                  if [ "$E" != "$CURRENT_ENV" ]; then
-                    NEW_ENVS+=("$E")
-                  fi
-                done
-
-                git tag -d "$TAG"
-                git push --delete origin "$TAG" || true
-
-                if [ ${#NEW_ENVS[@]} -gt 0 ]; then
-                  NEW_TAG=$(IFS='-'; echo "${NEW_ENVS[*]}")
-                  git tag "$NEW_TAG" $TAGGED_COMMIT
-                  git push origin "$NEW_TAG"
-                fi
+          for SEARCH_TAG in $(git tag -l | sort -r); do
+            if [[ "$SEARCH_TAG" == "$CURRENT_ENV" || "$SEARCH_TAG" == *"-$CURRENT_ENV" ]]; then
+              LATEST_ENV_COMMIT=$(git rev-parse $TAG^{commit} 2>/dev/null || echo "")
+              if [ ! -z "$LATEST_ENV_COMMIT" ]; then
+                break
               fi
             fi
           done
 
-          CURRENT_TAG=$(git tag -l --points-at $CURRENT_COMMIT | grep -E "^(development|staging|qa|production)(-.*)?$" || echo "")
+          CURRENT_TAGS=$(get_commit_tags $CURRENT_COMMIT)
+          if [ ! -z "$CURRENT_TAGS" ]; then
+            BASE_TAG=$(echo "$CURRENT_TAGS" | grep -v "$CURRENT_ENV" | head -n 1)
+            if [ ! -z "$BASE_TAG" ]; then
+              NEW_TAG="${BASE_TAG}-${CURRENT_ENVIRONMENT}"
 
-          if [ -z "$CURRENT_TAG" ]; then
-            NEW_TAG="$CURRENT_ENVIRONMENT"
-          else
-            if [[ ! "$CURRENT_TAG" =~ $CURRENT_ENVIRONMENT ]]; then
-              git tag -d "$CURRENT_TAG"
-              git push --delete origin "$CURRENT_TAG" || true
-              NEW_TAG="${CURRENT_TAG}-${CURRENT_ENVIRONMENT}"
+              git tag -d "$BASE_TAG"
+              git push --delete origin "$BASE_TAG" || true
             else
-              exit 0
+              NEW_TAG="$CURRENT_ENVIRONMENT"
             fi
+          else
+            NEW_TAG="$CURRENT_ENVIRONMENT"
+          fi
+
+          if [ ! -z "$LATEST_ENV_COMMIT" ] && [ "$LATEST_ENV_COMMIT" != "$CURRENT_COMMIT" ]; then
+            PREV_TAGS=$(get_commit_tags $LATEST_ENV_COMMIT)
+            for TAG in $PREV_TAGS; do
+              if [[ "$TAG" == *"-CURRENT_ENVIRONMENT" ]]; then
+
+                git tag -d "$TAG"
+                git push --delete origin "$TAG" || true
+
+                BASE_ENV=${TAG%-%CURRENT_ENV}
+                if [ ! -z "$BASE_ENV" ]; then
+                  git tag "$CURRENT_ENV" $LATEST_ENV_COMMIT
+                  git push origin "$CURRENT_ENV"
+                fi
+              fi
+            done
           fi
 
           echo "NEW TAG: $NEW_TAG"
