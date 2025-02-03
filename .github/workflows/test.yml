@@ -73,6 +73,40 @@ jobs:
             git tag -l --points-at $commit
           }
 
+          retry_git_operation() {
+            local max_attempts=3
+            local attempt=1
+            local command=$@
+
+            while [ $attempt -le $max_attempts ]; do
+              if eval "$command"; then
+                return 0
+              fi
+              echo 'Attempt $attempt failed, waiting...'
+              sleep $((attempt * 2))
+              attempt=$((attempt + 1))
+            done
+            return 1
+          }
+
+          safe_tag_delete() {
+            local tag=$1
+
+            retry_git_operation "git tag -d $tag"
+            retry_git_operation "git push --delete origin $tag || true"
+            sleep 1
+          }
+
+
+          safe_tag_push() {
+            local tag=$1
+            local commit=$2
+
+            retry_git_operation "git tag $tag $commit"
+            retry_git_operation "git push origin $tag"
+            sleep 1
+          }
+
           cleanup_old_env_tags() {
             local env=$1
 
@@ -81,26 +115,19 @@ jobs:
 
               if [ ! -z "$TAGGED_COMMIT" ] && [ "$TAGGED_COMMIT" != "$CURRENT_COMMIT" ]; then
                 if [[ "$TAG" == *"-$env" ]]; then
-                  git tag -d "$TAG"
-                  git push --delete origin "$TAG" || true
-
                   REMAINING_ENV=${TAG%-$env}
                   if [ ! -z "$REMAINING_ENV" ]; then
-                    git tag "$REMAINING_ENV" $TAGGED_COMMIT
-                    git push origin "$REMAINING_ENV"
+                    safe_tag_delete "$TAG"
+                    safe_tag_push "$REMAINING_ENV" $TAGGED_COMMIT
                   fi
                 elif [[ "$TAG" == "$env-"* ]]; then
-                  git tag -d "$TAG"
-                  git push --delete origin "$TAG" || true
-
                   REMAINING_ENV=${TAG#$env-}
                   if [ ! -z "$REMAINING_ENV" ]; then
-                    git tag "$REMAINING_ENV" $TAGGED_COMMIT
-                    git push origin "$REMAINING_ENV"
+                    safe_tag_delete "$TAG"
+                    safe_tag_push "$REMAINING_ENV" $TAGGED_COMMIT
                   fi
                 elif [[ "$TAG" == "$env" ]]; then
-                  git tag -d "$TAG"
-                  git push --delete origin "$TAG" || true
+                  safe_tag_delete "$TAG"
                 fi
               fi
             done
@@ -111,9 +138,7 @@ jobs:
             BASE_TAG=$(echo "$CURRENT_TAGS" | grep -v "$CURRENT_ENVIRONMENT" | head -n 1)
             if [ ! -z "$BASE_TAG" ]; then
               NEW_TAG="${BASE_TAG}-${CURRENT_ENVIRONMENT}"
-
-              git tag -d "$BASE_TAG"
-              git push --delete origin "$BASE_TAG" || true
+              safe_tag_delete"$BASE_TAG"
             else
               NEW_TAG="$CURRENT_ENVIRONMENT"
             fi
@@ -123,7 +148,5 @@ jobs:
 
           cleanup_old_env_tags "$CURRENT_ENVIRONMENT"
 
-          echo "NEW TAG: $NEW_TAG"
-          git tag "$NEW_TAG" $CURRENT_COMMIT
-          git push origin "$NEW_TAG"
+          safe_tag_push "$NEW_TAG" "$CURRENT_COMMIT"
 
