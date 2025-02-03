@@ -151,5 +151,3 @@ jobs:
           cleanup_old_env_tags "$CURRENT_ENVIRONMENT"
 
           safe_tag_push "$NEW_TAG" "$CURRENT_COMMIT"
-
-
