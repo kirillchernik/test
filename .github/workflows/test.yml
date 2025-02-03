@@ -66,6 +66,7 @@ jobs:
           }
 
           EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)(-.*)?$" || true)
+          echo "EXISTING_TAGS: $EXISTING_TAGS"
 
           for TAG in $EXISTING_TAGS; do
             TAGGED_COMMIT=$(get_tagged_commit $TAG)
