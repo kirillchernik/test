@@ -75,7 +75,7 @@ jobs:
           cleanup_old_env_tags() {
             local env=$1
 
-            for TAG in $(git tag -l "*{env}*" | grep -v "^$CURRENT_COMMIT"); do
+            for TAG in $(git tag -l "*${env}*" | grep -v "^$CURRENT_COMMIT"); do
               TAGGED_COMMIT=$(git rev-parse $TAG^{commit} 2>/dev/null || echo "")
 
               if [ ! -z "$TAGGED_COMMIT" ] && [ "$TAGGED_COMMIT" != "$CURRENT_COMMIT" ]; then
