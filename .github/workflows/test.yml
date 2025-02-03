@@ -75,8 +75,8 @@ jobs:
           LATEST_ENV_COMMIT=""
 
           for SEARCH_TAG in $(git tag -l | sort -r); do
-            if [[ "$SEARCH_TAG" == "$CURRENT_ENV" || "$SEARCH_TAG == *"-CURRENT_ENV" ]]; then
-              LATEST_ENV_COMMIT=$(git rev-parse $TAG^{commit} 2>dev/null || echo "")
+            if [[ "$SEARCH_TAG" == "$CURRENT_ENV" || "$SEARCH_TAG" == *"-$CURRENT_ENV" ]]; then
+              LATEST_ENV_COMMIT=$(git rev-parse $TAG^{commit} 2>/dev/null || echo "")
               if [ ! -z "$LATEST_ENV_COMMIT" ]; then
                 break
               fi
@@ -86,28 +86,34 @@ jobs:
           CURRENT_TAGS=$(get_commit_tags $CURRENT_COMMIT)
           if [ ! -z "$CURRENT_TAGS" ]; then
             # TODO
-            BASE_TAG=$(echo "$CURRENT_TAGS" | grep -v "CURRENT_ENV" | head -n 1)
+            BASE_TAG=$(echo "$CURRENT_TAGS" | grep -v "$CURRENT_ENV" | head -n 1)
             if [ ! -z "$BASE_TAG" ]; then
               NEW_TAG="${BASE_TAG}-${CURRENT_ENVIRONMENT}"
 
               git tag -d "$BASE_TAG"
               git push --delete origin "$BASE_TAG" || true
             else
-              NEW_TAG="${CURRENT_ENVIRONMENT}"
+              NEW_TAG="$CURRENT_ENVIRONMENT"
             fi
           else
-            NEW_TAG="${CURRENT_ENVIRONMENT}"
+            NEW_TAG="$CURRENT_ENVIRONMENT"
           fi
 
           if [ ! -z "$LATEST_ENV_COMMIT" ] && [ "$LATEST_ENV_COMMIT" != "$CURRENT_COMMIT" ]; then
-            git tag -d "$TAG"
-            git push --delete origin "$TAG" || true
+            PREV_TAGS=$(get_commit_tags $LATEST_ENV_COMMIT)
+            for TAG in $PREV_TAGS; do
+              if [[ "$TAG" == *"-CURRENT_ENVIRONMENT" ]]; then
 
-            BASE_ENV=${TAG%-%CURRENT_ENV}
-            if [ ! -z "$BASE_ENV" ]; then
-              git tag "$CURRENT_ENV" $LATEST_ENV_COMMIT
-              git push origin "$CURRENT_ENV"
-            fi
+                git tag -d "$TAG"
+                git push --delete origin "$TAG" || true
+
+                BASE_ENV=${TAG%-%CURRENT_ENV}
+                if [ ! -z "$BASE_ENV" ]; then
+                  git tag "$CURRENT_ENV" $LATEST_ENV_COMMIT
+                  git push origin "$CURRENT_ENV"
+                fi
+              fi
+            done
           fi
 
           echo "NEW TAG: $NEW_TAG"
