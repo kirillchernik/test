@@ -85,7 +85,6 @@ jobs:
 
           CURRENT_TAGS=$(get_commit_tags $CURRENT_COMMIT)
           if [ ! -z "$CURRENT_TAGS" ]; then
-            # TODO
             BASE_TAG=$(echo "$CURRENT_TAGS" | grep -v "$CURRENT_ENV" | head -n 1)
             if [ ! -z "$BASE_TAG" ]; then
               NEW_TAG="${BASE_TAG}-${CURRENT_ENVIRONMENT}"
