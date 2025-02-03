@@ -138,7 +138,7 @@ jobs:
             BASE_TAG=$(echo "$CURRENT_TAGS" | grep -v "$CURRENT_ENVIRONMENT" | head -n 1)
             if [ ! -z "$BASE_TAG" ]; then
               NEW_TAG="${BASE_TAG}-${CURRENT_ENVIRONMENT}"
-              safe_tag_delete"$BASE_TAG"
+              safe_tag_delete "$BASE_TAG"
             else
               NEW_TAG="$CURRENT_ENVIRONMENT"
             fi
