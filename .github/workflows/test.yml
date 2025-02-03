@@ -39,6 +39,7 @@ jobs:
   tag-commit:
     permissions:
       contents: write
+      workflows: write
     name: Tag Commit
     runs-on: ubuntu-latest
     # Only run this step if the deployment succeeded.
