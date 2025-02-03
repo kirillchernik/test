@@ -60,6 +60,7 @@ jobs:
           CURRENT_COMMIT=$(git rev-parse HEAD)
           CURRENT_ENVIRONMENT="${{ github.event_name == 'push' && 'development' || inputs.environment }}"
 
+
           get_tagged_commit() {
             local tag=$1
             git rev-parse $tag^{commit} 2>/dev/null || echo ""
@@ -67,8 +68,12 @@ jobs:
 
           EXISTING_TAGS=$(git tag -l | grep -E "^(development|staging|qa|production)(-.*)?$" || true)
 
+          echo "All tags"
+          get tag -l
+
           for TAG in $EXISTING_TAGS; do
             TAGGED_COMMIT=$(get_tagged_commit $TAG)
+            echo "tag $TAG points to $TAGGED_COMMIT"
             if [ ! -z "$TAGGED_COMMIT" ]; then
               IFS='-' read -ra ENVS <<< "$TAG"
 
