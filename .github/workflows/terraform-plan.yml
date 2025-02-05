@@ -5,6 +5,6 @@ jobs:
     strategy:
       matrix:
         environment: [staging, production]
-    uses: plan: ./.github/workflows/terraform-plan-base.yml
+    uses: ./.github/workflows/terraform-plan-base.yml
     with:
       environment: ${{ matrix.environment }}
