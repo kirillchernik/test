@@ -12,3 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "test ${{inputs.environment}}"
+      - run: echo "var is ${{vars.CAN_DEPLOY}}"
