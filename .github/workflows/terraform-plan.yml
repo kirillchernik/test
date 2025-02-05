@@ -1,0 +1,10 @@
+name: Plan
+on: push
+jobs:
+  plan:
+    strategy:
+      matrix:
+        environment: [staging, production]
+    uses: ./.github/workflows/terraform-plan-base.yml
+    with:
+      environment: ${{ matrix.environment }}
