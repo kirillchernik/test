@@ -1,7 +1,7 @@
 name: Plan
 on: push
 jobs:
-  plan:
+  plan-env:
     strategy:
       matrix:
         environment: [staging, production]
