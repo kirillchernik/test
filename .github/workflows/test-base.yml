@@ -10,10 +10,10 @@ on:
 jobs:
   deploy:
     # github currently does not support usage of env variables on a job level definitions
-    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+    name: Test ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
+      name: ${{ inputs.environment }}
     # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
     # Once dev is live -- remove the `if` condition below.
     # if: ${{ github.event_name != 'push' && inputs.environment != 'development' }}
