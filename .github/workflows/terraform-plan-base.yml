@@ -10,6 +10,8 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
     steps:
       - run: echo "test ${{inputs.environment}}"
       - run: echo "var is ${{vars.CAN_DEPLOY}}"
