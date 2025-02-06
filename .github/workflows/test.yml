@@ -6,10 +6,12 @@ jobs:
     uses: ./.github/workflows/test-base.yml
     with:
       environment: development
-    secrets: inherit
+    secrets:
+      SECRET: "${{ secrets.SECRET }}"
   test_stg:
     uses: ./.github/workflows/test-base.yml
     needs: test_dev
     with:
       environment: staging
-    secrets: inherit
+    secrets:
+      SECRET: "${{ secrets.SECRET }}"
