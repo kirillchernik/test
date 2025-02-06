@@ -6,9 +6,9 @@ on:
       environment:
         required: true
         type: string
-      secrets:
-        SECRET:
-          required: true
+    secrets:
+      SECRET:
+        required: true
 
 jobs:
   deploy:
