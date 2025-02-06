@@ -16,14 +16,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
+    secrets: inherit
     steps:
       - name: dev
         uses: ./.github/workflows/test-base.yml
         with:
           environment: development
-        secrets: inherit
       - name: stg
         uses: ./.github/workflows/test-base.yml
         with:
           environment: staging
-        secrets: inherit
