@@ -1,39 +1,13 @@
-
-name: "Test"
-on:
-  # This will trigger deployment to `development` on each push to main
-  # `development` is set as a default environment below
-  push:
-    branches:
-      - main
-  # However, deployemnt to other environments (or re-running job for `development`) should be done manually
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment to deploy to"
-        type: environment
-        required: true
-
-# env:
-#   # If the environment input was not provided (i.e if the commit was pushed to main),
-#   # default to `development`. Effectively, the job below will run deploy for `development` on each push to main,
-#   # and use an input environment for manually triggered jobs
-#   CURRENT_ENVIRONMENT: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
-permissions:
-  contents: write
-
+name: Plan
+on: push
 jobs:
-  deploy:
-    # github currently does not support usage of env variables on a job level definitions
-    name: Test ${{ github.event_name == 'push' && 'development' || inputs.environment }}
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event_name == 'push' && 'development' || inputs.environment }}
-    # TODO: Currently we do not have a dev environment, so we cannot actually deploy.
-    # Once dev is live -- remove the `if` condition below.
-    # if: ${{ github.event_name != 'push' && inputs.environment != 'development' }}
-    steps:
-      - name: Test variables
-        id: test
-        run: echo "VARIABLE IS ${{vars.CAN_DEPLOY}}"
-        continue-on-error: false
+  test_dev:
+    uses: ./.github/workflows/test-base.yml
+    with:
+      environment: development
+    secrets: inherit
+  test_stg:
+    uses: ./.github/workflows/test-base.yml
+    with:
+      environment: staging
+    secrets: inherit
