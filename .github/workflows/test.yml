@@ -1,13 +1,28 @@
 name: Plan
 on: push
+# jobs:
+#   test_dev:
+#     uses: ./.github/workflows/test-base.yml
+#     with:
+#       environment: development
+#     secrets: inherit
+#   test_stg:
+#     uses: ./.github/workflows/test-base.yml
+#     with:
+#       environment: staging
+#     secrets: inherit
+
 jobs:
-  test_dev:
-    uses: ./.github/workflows/test-base.yml
-    with:
-      environment: development
-    secrets: inherit
-  test_stg:
-    uses: ./.github/workflows/test-base.yml
-    with:
-      environment: staging
-    secrets: inherit
+  deploy:
+    steps:
+      runs-on: ubuntu-latest
+      - name: dev
+        uses: ./.github/workflows/test-base.yml
+        with:
+          environment: development
+        secrets: inherit
+      - name: stg
+        uses: ./.github/workflows/test-base.yml
+        with:
+          environment: staging
+        secrets: inherit
