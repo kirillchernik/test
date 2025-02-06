@@ -1,15 +1,29 @@
+# name: Plan
+# on: push
+# jobs:
+#   test_dev:
+#     name: Deploy Development
+#     uses: ./.github/workflows/test-base.yml
+#     with:
+#       environment: development
+#     secrets: inherit
+#   test_stg:
+#     name: Deploy Staging
+#     uses: ./.github/workflows/test-base.yml
+#     with:
+#       environment: staging
+#     secrets: inherit
+
+
+
 name: Plan
 on: push
 jobs:
-  test_dev:
-    name: Deploy Development
+  test:
+    strategy:
+      matrix:
+        environment: [staging,development]
     uses: ./.github/workflows/test-base.yml
     with:
-      environment: development
-    secrets: inherit
-  test_stg:
-    name: Deploy Staging
-    uses: ./.github/workflows/test-base.yml
-    with:
-      environment: staging
+      environment: ${{ matrix.environment }}
     secrets: inherit
