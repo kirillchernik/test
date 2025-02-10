@@ -72,13 +72,13 @@ jobs:
 
           echo "Building docker image for lambda ${IMAGE_TAG}"
 
-          docker build \
+          docker run -it $(docker build \
           --tag "${IMAGE_TAG}" \
           --file "${{ matrix.config.dockerfile }}" \
           --build-context workspace=. \
           --build-context project="${{ matrix.config.context }}" \
           --platform linux/amd64 \
-          ${{ matrix.config.context }}
+          -q ${{ matrix.config.context }})
 
           docker images ${IMAGE_TAG}
           docker inspect ${IMAGE_TAG}
