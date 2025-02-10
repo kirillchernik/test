@@ -59,9 +59,9 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-publish
         run: |
-          IMAGE_TAG="${{ matrix.config.name }}-${{ github.sha }}"
+          IMAGE_TAG_BASE="${{ matrix.config.name }}-${{ github.sha }}"
 
-          echo "Building docker image for lambda ${{ IMAGE_TAG }}"
+          echo "Building docker image for lambda ${{ IMAGE_TAG_BASE }}"
 
           # docker build \
           # --tag "$ECR_REGISTRY/$ECR_REPOSITORY:${IMAGE_TAG}" \
