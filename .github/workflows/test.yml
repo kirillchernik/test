@@ -55,6 +55,8 @@ jobs:
           echo "dockerfile ${{ matrix.config.dockerfile }}"
           echo "context ${{ matrix.config.context }}"
           echo "name ${{ matrix.config.name }}"
+      - name: ls
+        run: ls
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-publish
