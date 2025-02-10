@@ -55,6 +55,10 @@ jobs:
           echo "dockerfile ${{ matrix.config.dockerfile }}"
           echo "context ${{ matrix.config.context }}"
           echo "name ${{ matrix.config.name }}"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: ls
         run: ls
 
@@ -67,8 +71,6 @@ jobs:
           IMAGE_TAG="${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ matrix.config.name }}-${{ github.sha }}"
 
           echo "Building docker image for lambda ${IMAGE_TAG}"
-
-          ls
 
           # docker build \
           # --tag "${IMAGE_TAG}" \
