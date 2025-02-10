@@ -62,3 +62,11 @@ jobs:
           IMAGE_TAG="${{ matrix.config.name }}-${{ github.sha }}"
 
           echo "Building docker image for lambda ${IMAGE_TAG}"
+
+          docker build \
+          --tag "$ECR_REGISTRY/$ECR_REPOSITORY:${IMAGE_TAG}" \
+          --file "${{ matrix.config.dockerfile }}" \
+          --build-context workspace=. \
+          --build-context project= "${{ matrix.config.context }} \
+          --platform linux/amd64 \
+          .
