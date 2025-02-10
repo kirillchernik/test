@@ -23,7 +23,14 @@ jobs:
       - name: generate-matrix
         id: generate-matrix
         run: |
-          PATHS_JSON=$(echo "${{ steps.glob.outputs.paths }}" | jq -R 'split(" ")' | jq '[.[] | split("/")[0:-1] | join("/")]' | jq -c .)
+          PATHS_JSON= \
+            $(echo "${{ steps.glob.outputs.paths }}" | \
+            jq -R 'split(" ")' | \
+            jq '[.[] | { \
+              dockerfile: .,
+              context: (split("/")[0:-1] | join("/")),
+              name: (split("/")[2:-2] | join("-"))
+            }] | jq -c .)
           echo "matrix=${PATHS_JSON}" >> $GITHUB_OUTPUT
 
   configure:
@@ -39,8 +46,10 @@ jobs:
     needs: [ init, configure ]
     strategy:
       matrix:
-        path: ${{ fromJSON(needs.init.outputs.matrix) }}
+        config: ${{ fromJSON(needs.init.outputs.matrix) }}
     steps:
       - name: build
         run: |
-          echo "Building ${{ matrix.path }}"
+          echo "dockerfile ${{ matrix.config.dockerfile }}"
+          echo "context ${{ matrix.config.context }}"
+          echo "name ${{ matrix.config.name }}"
