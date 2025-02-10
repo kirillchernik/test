@@ -59,8 +59,8 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-publish
         env:
-          ECR_REGISTRY: ABC # TODO
-          ECR_REPOSITORY: CDE # TODO
+          ECR_REGISTRY: abc # TODO
+          ECR_REPOSITORY: cde # TODO
         run: |
           IMAGE_TAG="${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ matrix.config.name }}-${{ github.sha }}"
 
