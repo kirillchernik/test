@@ -59,4 +59,4 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-publish
         run: |
-          ABC="123"
+          IMAGE_TAG_A="123"
