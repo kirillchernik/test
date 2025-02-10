@@ -8,8 +8,8 @@ on: push
 jobs:
   init:
     runs-on: ubuntu-latest
-    # outputs:
-    #   to_build: ${{ steps.generate-matrix.outputs.to_build }}
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,4 +22,25 @@ jobs:
 
       - name: generate-matrix
         id: generate-matrix
-        run: echo "${{ steps.glob.outputs.paths }}"
+        run: |
+          PATHS_JSON=$(echo "${{ steps.glob.outputs.paths }}" | jq -R 'split(" ")' | jq '[.[] | split("/")[0:-1] | join("/")]' | jq -c .)
+          echo "matrix=${PATHS_JSON}" >> $GITHUB_OUTPUT
+
+  configure:
+    runs-on: ubuntu-latest
+    needs: init
+    steps:
+      - name: Skip
+        run: |
+          echo "Hello"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [ init, configure ]
+    strategy:
+      matrix:
+        path: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - name: build
+        run: |
+          echo "Building ${{ matrix.path }}"
