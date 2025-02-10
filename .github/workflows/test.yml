@@ -1,17 +1,25 @@
+name: Docker Build
 
-name: Plan
 on: push
+    # paths:
+    # identify paths
+    # TODO: use output from glob?
+    # - /outbound/integration-handlers/<partner>/<integration handler name>
 jobs:
-  test_dev:
-    uses: ./.github/workflows/test-base.yml
-    with:
-      environment: development
-    secrets:
-      SECRET: "${{ secrets.SECRET }}"
-  test_stg:
-    uses: ./.github/workflows/test-base.yml
-    needs: test_dev
-    with:
-      environment: staging
-    secrets:
-      SECRET: "${{ secrets.SECRET }}"
+  init:
+    runs-on: ubuntu-latest
+    # outputs:
+    #   to_build: ${{ steps.generate-matrix.outputs.to_build }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Glob match
+        uses: tj-actions/glob@v22
+        id: glob
+        with:
+          files: /outbound/integration-handlers/**/Dockerfile
+
+      - name: generate-matrix
+        id: generate-matrix
+        run: echo "${{ steps.glob.outputs.paths }}"
