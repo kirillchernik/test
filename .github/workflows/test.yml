@@ -60,3 +60,5 @@ jobs:
         id: build-publish
         run: |
           IMAGE_TAG="${{ matrix.config.name }}-${{ github.sha }}"
+
+          echo "Building docker image for lambda ${IMAGE_TAG}"
