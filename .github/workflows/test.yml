@@ -50,8 +50,27 @@ jobs:
       matrix:
         config: ${{ fromJSON(needs.init.outputs.matrix) }}
     steps:
-      - name: build
+      - name: test
         run: |
           echo "dockerfile ${{ matrix.config.dockerfile }}"
           echo "context ${{ matrix.config.context }}"
           echo "name ${{ matrix.config.name }}"
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-publish
+        shell: bash
+        env:
+          ECR_REGISTRY: ABC
+          ECR_REPOSITORY: CDE
+        run: |
+          IMAGE_TAG="${{ inputs.image_tag }}-${{ github.sha }}"
+
+          echo "Building docker image for lambda ${{ IMAGE_TAG }}"
+
+          docker build \
+          --tag "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
+          --file "${{ matrix.config.dockerfile }}" \
+          --build-context workspace=. \
+          --build-context project= "${{ matrix.config.context }} \
+          --platform linux/amd64 \
+          .
