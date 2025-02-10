@@ -30,7 +30,7 @@ jobs:
               dockerfile: .,
               context: (split("/")[0:-1] | join("/")),
               name: (split("/")[2:-2] | join("-"))
-            }] | jq -c .)
+            }]' | jq -c .)
           echo "matrix=${PATHS_JSON}" >> $GITHUB_OUTPUT
 
   configure:
