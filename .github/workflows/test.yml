@@ -30,7 +30,7 @@ jobs:
                 dockerfile: .,
                 context: (split("/")[0:-1] | join("/")),
                 name: (split("/")[2:-1] | join("-")),
-                module: (split("/")[2:-1] | join("_"))
+                module: ((split("/")[2:-1] | join("_")) | tr '-' '_')
               }
             ]' | \
             jq -c .)
