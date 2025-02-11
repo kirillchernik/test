@@ -30,7 +30,7 @@ jobs:
                 dockerfile: .,
                 context: (split("/")[0:-1] | join("/")),
                 name: (split("/")[2:-1] | join("-")),
-                module: ((split("/")[2:-1] | join("_")) | sed -r 's/[/-]+/_/g)
+                module: ((split("/")[2:-1] | join("_")) | sed -r 's/[/-]+/_/g')
               }
             ]' | \
             jq -c .)
