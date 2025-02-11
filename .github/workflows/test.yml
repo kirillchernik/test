@@ -29,7 +29,8 @@ jobs:
               .[] | {
                 dockerfile: .,
                 context: (split("/")[0:-1] | join("/")),
-                name: (split("/")[2:-1] | join("-"))
+                name: (split("/")[2:-1] | join("-")),
+                module: (split("/")[2:-1] | join("_"))
               }
             ]' | \
             jq -c .)
@@ -55,12 +56,11 @@ jobs:
           echo "dockerfile ${{ matrix.config.dockerfile }}"
           echo "context ${{ matrix.config.context }}"
           echo "name ${{ matrix.config.name }}"
+          echo "module ${{ matrix.config.module }}"
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: ls
-        run: ls
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-publish
@@ -71,16 +71,10 @@ jobs:
           IMAGE_TAG="${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ matrix.config.name }}-${{ github.sha }}"
 
           echo "Building docker image for lambda ${IMAGE_TAG}"
-
-          docker run $(docker build \
+          docker build \
           --tag "${IMAGE_TAG}" \
           --file "${{ matrix.config.dockerfile }}" \
           --build-context workspace=. \
           --build-context project="${{ matrix.config.context }}" \
           --platform linux/amd64 \
-          -q ${{ matrix.config.context }})
-
-          docker images ${IMAGE_TAG}
-          docker inspect ${IMAGE_TAG}
-          docker image ls --format "Size: {{ .Size }} | Created: {{ .CreatedAt }}" ${IMAGE_TAG}
-
+          ${{ matrix.config.context }}
