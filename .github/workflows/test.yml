@@ -11,5 +11,4 @@ jobs:
     steps:
       - name: test
         run: |
-          test="stg"
-          echo "${test^}"
+          echo "${{ github.event_name^ }}"
