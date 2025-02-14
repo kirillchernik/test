@@ -24,3 +24,6 @@ jobs:
 
       - name: Test action
         uses: ./.github/actions/docker-build
+        with:
+          ecr-role-arn: ABC
+          environment: ${{ inputs.environment }}
