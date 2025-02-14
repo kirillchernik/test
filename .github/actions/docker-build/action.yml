@@ -1,0 +1,15 @@
+name: 'Build Docker'
+description: "not inmportant"
+inputs:
+  ecr-role-arn:
+    description: "not inmportant"
+    required: true
+  environment:
+    description: "not inmportant"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Test"
+      run: echo ${{ inputs.ecr-role-arn }}

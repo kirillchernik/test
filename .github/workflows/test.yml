@@ -1,14 +1,9 @@
-name: Test
+name: Terraform Apply
 
 on: push
-    # paths:
-    # identify paths
-    # TODO: use output from glob?
-    # - /outbound/integration-handlers/<partner>/<integration handler name>
+
 jobs:
-  init:
-    runs-on: ubuntu-latest
-    steps:
-      - name: test
-        run: |
-          echo "${${{ github.event_name }}^}"
+  terraform_apply_staging:
+    uses: ./.github/workflows/terraform-apply-base.yml
+    with:
+      environment: staging
