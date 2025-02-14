@@ -12,4 +12,5 @@ runs:
   using: "composite"
   steps:
     - name: "Test"
+      shell: bash
       run: echo ${{ inputs.ecr-role-arn }}
