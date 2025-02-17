@@ -17,4 +17,4 @@ jobs:
       contents: read
     steps:
       - name: test
-        run: echo role ${{ inputs.role }}
+        run: echo role "arn:aws:iam::${{ inputs.role }}:role/ecr-github-actions"
