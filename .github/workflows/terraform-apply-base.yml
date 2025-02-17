@@ -3,27 +3,18 @@ name: Terraform Apply Base
 on:
   workflow_call:
     inputs:
-      environment:
+      # environment:
+      #   required: true
+      #   type: string
+      role:
         required: true
         type: string
-
 jobs:
   terraform-apply:
-    name: Deploy to ${{ inputs.environment }}
+    name: TEST
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    environment:
-      name: ${{ inputs.environment }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Test
-        run: echo ${{ env.CAN_DEPLOY }}
-
-      - name: Test action
-        uses: ./.github/actions/docker-build
-        with:
-          ecr-role-arn: ABC
-          environment: ${{ inputs.environment }}
+      - name: test
+        run: echo role ${{ inputs.role }}

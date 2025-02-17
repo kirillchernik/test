@@ -6,4 +6,4 @@ jobs:
   terraform_apply_staging:
     uses: ./.github/workflows/terraform-apply-base.yml
     with:
-      environment: staging
+      role: ${{ vars.STG_ABC }}
