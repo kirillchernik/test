@@ -3,7 +3,22 @@ name: Terraform Apply
 on: push
 
 jobs:
-  terraform_apply_staging:
-    uses: ./.github/workflows/terraform-apply-base.yml
-    with:
-      role: ${{ vars.STG_ABC }}
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read
+        pull-requests: write
+    steps:
+      - name: Check plan status
+        id: check-plan-status
+        run:
+          status="finished"
+
+          echo "Checking the Terrafom Plan status"
+
+          if [[ "$status" == "errored" ]]; then
+            exit 1
+          else
+            exit 0
+          fi
