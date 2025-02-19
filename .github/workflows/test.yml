@@ -12,10 +12,8 @@ jobs:
     steps:
       - name: Check plan status
         id: check-plan-status
-        run:
+        run: |
           status="finished"
-
-          echo "Checking the Terrafom Plan status"
 
           if [[ "$status" == "errored" ]]; then
             exit 1
